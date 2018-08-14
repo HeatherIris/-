@@ -1,0 +1,249 @@
+<html langl="en">
+<head>
+	<title>document</title>
+	<meta charset="utf-8">
+
+	<style type="text/css">
+		*{
+		margin: 0;
+        padding:0;
+    }
+    .wrapper{
+    	margin: 0 auto;
+    	position: relative;
+    	width: 400px;
+    	border: 3px solid orange;
+    
+    }
+    td{
+        width: 20px;
+        height: 20px;
+        background: yellow;
+        border: 1px solid yellow;
+    }
+    tr {
+    	width: 20px;
+        height: 20px;
+        border: 1px solid green;
+    }	
+    .food{
+    	position: absolute;
+    	width: 20px;
+    	height: 20px;
+    	background-color: blue;
+    	overflow: hidden;
+    	border-radius: 50%;
+    }
+    .tail{
+    	position: absolute;
+    	display: inline-block;
+    	width: 20px;
+    	height: 20px;
+    	background: green;
+    	border-radius: 5px;
+    }
+    .head{
+    	position: absolute;
+    	display: inline-block;
+    	width: 20px;
+    	height: 20px;
+    	background: black;
+    	border-radius: 5px;
+    }
+    .add{
+    	position: absolute;
+    	overflow: hidden;
+    	width: 20px;
+    	height: 20px;
+    	background: green;
+    	border-radius: 5px;
+    	overflow: hidden;
+
+    }
+	</style>
+</head>
+<body>
+	<!-- <div class="wrapper">
+		
+	</div> -->
+	<script type="text/javascript">
+		var timer = null;
+		var e;
+		function eatSnake () {
+			//创建dom框架
+			var oWrapper = document.createElement('div');
+			oWrapper.className = 'wrapper';
+			for (var i = 0; i < 20; i++) {
+				var oTr = document.createElement('tr');
+				for (var j = 0; j < 20; j++) {
+					var oTd = document.createElement('td');
+					oTr.appendChild(oTd);
+				}
+				oWrapper.appendChild(oTr);
+			}
+			document.body.appendChild(oWrapper);
+
+			//创建蛇
+			var snake = [];
+			function createSnake () {
+					
+				for (var i = 0; i < 3; i++) {
+					var sTail = document.createElement('div');
+					sTail.className = 'tail';
+					sTail.style.left = (2 - i) * 20 + 'px';
+					sTail.style.top = 60 + 'px';
+					oWrapper.appendChild(sTail);
+					//向snake数组的末尾添加div
+					snake.push(sTail);
+					var sHead = snake[0];
+					sHead.className = 'head';
+					// console.log(sHead);
+					
+				}
+			}
+			createSnake();
+
+			//生成食物
+			var oFood;
+			function createFood () {
+				//防止食物和蛇重合
+				do{
+					var oFlag = true; 
+					var oLeft = Math.floor(Math.random() * 20) * 20; 
+					var oTop = Math.floor(Math.random() * 20) * 20;
+					for (var i = 0; i < snake.length; i++) {
+						if (snake[i].offsetLeft == oLeft.offsetLeft && snake[i].offsetTop == oTop.offsetTop) {
+							oFlag = false;
+							break;
+						}
+					}
+					
+				}while(!oFlag);
+				oFood = document.createElement('div');
+				oFood.className = 'food';
+				oFood.style.left = oLeft + 'px';
+				oFood.style.top = oTop + 'px';
+				oWrapper.appendChild(oFood);
+			}
+			createFood();
+
+			//监听键盘事件
+			var timer = null;
+ 			document.onkeyup = function (e) {
+ 				clearInterval(timer);
+ 				timer = setInterval(function () {
+ 					snakeMove();
+ 				}, 200);
+ 				//键盘录入
+ 				var e = e || window.event;
+ 				var keyCode = e.keyCode;
+ 				switch(keyCode) {
+ 					case 37://left
+ 					if (direction != "right") {     //防止后退
+						direction = "left";
+ 					}
+ 					
+ 					break;
+ 					case 38://up
+ 					if (direction != "down") {
+ 						direction = "up";
+ 					}
+ 					break;
+ 					case 39://right
+ 					if (direction != "left") {
+ 						direction = "right";
+ 					}
+ 					break;
+ 					case 40:
+ 					if (direction != "up") {
+ 						direction = "down";
+ 					}
+ 					break;
+ 				}
+ 			}
+
+			//运动
+			var direction = '';
+			function snakeMove () {
+				var gTime = 0;
+				this.sHead = snake[0];
+				console.log(this.sHead);
+				console.log(snake[0].style.left);//20px
+				console.log(snake[0].offsetLeft);//20
+				//移动
+				var newSnack = {
+					left: sHead.offsetLeft,
+					top: sHead.offsetTop
+				};
+				switch(direction) {
+					case "left": newSnack.left -= 20;
+								break;
+					case "right": newSnack.left += 20;
+								break;
+					case "up": newSnack.top -= 20;
+								break;
+					case "down": newSnack.top += 20;
+								break;
+				}
+			
+				for (var i = 0; i < snake.length; i++) {
+						//确定现在的位置
+					var oldSnack = {
+						left: snake[i].offsetLeft,
+						top: snake[i].offsetTop
+					}
+					snake[i].style.left = newSnack.left + 'px';
+					snake[i].style.top = newSnack.top + 'px';
+					console.log(snake[i].style.left)
+					// 40  20  0
+					console.log(snake[i].style.top)
+					// 60  60  60
+					//刷新
+					newSnack = oldSnack;
+					console.log(snake.length)
+				}
+				//碰撞检测
+				//碰上食物
+				if (snake[0].offsetLeft == oFood.offsetLeft && snake[0].offsetTop == oFood.offsetTop) {
+					var addBody = document.createElement('div');
+					addBody.className = 'add';
+					oWrapper.appendChild(addBody);
+					snake.push(addBody); 
+					oWrapper.removeChild(oFood);
+					createFood();
+				}
+				//碰上墙，游戏结束
+				if (snake[0].offsetLeft < 0 || snake[0].offsetTop < 0 || snake[0].offsetLeft > 380 || snake[0].offsetTop > 380) {
+					clearInterval(timer);
+					alert('(= * ω * =) over');
+					alert('score: ' + snake.length);
+					document.body.removeChild(oWrapper);
+					createFood();
+					eatSnake();
+				}
+				
+			}
+
+			//游戏结束
+			// function gameOver () {
+			// 	if (snake[0].offsetLeft < 0 ) {
+			// 		clearInterval(timer);
+			// 		alert(0);
+			// 		document.body.removeChild(oWrapper);
+			// 		createFood();
+			// 		eatSnake();
+			// 	}
+			// }
+
+   //         gameOver();
+    }		
+	window.onload = function () {
+		alert('(= ^ ω ^ =) go')
+		eatSnake();
+	}		
+
+		
+	</script>
+
+</body>
+</html>
